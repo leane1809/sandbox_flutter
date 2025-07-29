@@ -6,13 +6,17 @@ void main() {
   runApp(const MyApp());
 }
 
-//fonction pour la gestion dee l'email
-String genererMessage(String prenom, String nom, String email) {
-  if (prenom.isEmpty || nom.isEmpty || email.isEmpty) {
+//fonction pour la gestion de l'email
+String genererMessage(String prenom, String nom, String email, String age) {
+  if (prenom.isEmpty || nom.isEmpty || email.isEmpty || age.isEmpty) {
     return 'Champs requis';
   }
   if (!email.contains('@')) {
     return 'Email invalide';
+  }
+  final parsedAge = int.tryParse(age);
+  if (parsedAge == null || parsedAge < 0) {
+    return 'Âge invalide';
   }
   return 'Merci $prenom $nom';
 }
@@ -42,6 +46,7 @@ class _FormulaireWidgetState extends State<FormulaireWidget> {
   final _prenomController = TextEditingController();
   final _nomController = TextEditingController();
   final _emailController = TextEditingController();
+  final _ageController = TextEditingController();
 
   String _message = '';
   bool afficherOK = false;
@@ -50,10 +55,13 @@ class _FormulaireWidgetState extends State<FormulaireWidget> {
     String prenom = _prenomController.text.trim();
     String nom = _nomController.text.trim();
     String email = _emailController.text.trim();
+    String age = _ageController.text.trim();
 
-    String resultat = genererMessage(prenom, nom, email);
+    String resultat = genererMessage(prenom, nom, email, age);
 
-    if (resultat == 'Champs requis' || resultat == 'Email invalide') {
+    if (resultat == 'Champs requis' ||
+        resultat == 'Email invalide' ||
+        resultat == 'Âge invalide') {
       _afficherErreur(context, resultat);
       return;
     }
@@ -89,6 +97,7 @@ class _FormulaireWidgetState extends State<FormulaireWidget> {
       _prenomController.clear();
       _nomController.clear();
       _emailController.clear();
+      _ageController.clear();
     });
   }
 
@@ -138,6 +147,8 @@ class _FormulaireWidgetState extends State<FormulaireWidget> {
           SizedBox(height: 16),
           _buildChamp('Email', _emailController),
           SizedBox(height: 24),
+          _buildChamp('Age', _ageController),
+          SizedBox(height: 24),
           Center(
             child: ElevatedButton(
               onPressed: _envoyer,
@@ -173,6 +184,9 @@ class _FormulaireWidgetState extends State<FormulaireWidget> {
         SizedBox(height: 8),
         TextField(
           controller: controller,
+          keyboardType: label == 'Age'
+              ? TextInputType.number
+              : TextInputType.text,
           decoration: InputDecoration(
             border: OutlineInputBorder(),
             hintText: 'Entrez votre $label',
